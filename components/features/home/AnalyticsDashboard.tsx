@@ -28,8 +28,8 @@ const STATUS_COLORS: Record<string, string> = {
 const cardStyle: React.CSSProperties = {
     background: 'rgba(255,255,255,0.03)',
     border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '20px',
-    padding: '28px',
+    borderRadius: '16px',
+    padding: '20px',
 };
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -139,12 +139,12 @@ export const AnalyticsDashboard = () => {
     ];
 
     const chartTitle: React.CSSProperties = {
-        fontSize: '14px',
+        fontSize: '13px',
         fontWeight: 600,
         color: 'rgba(255,255,255,0.5)',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
-        marginBottom: '24px',
+        marginBottom: '12px',
     };
 
     const axisTick = { fill: 'rgba(255,255,255,0.35)', fontSize: 11 };
@@ -152,7 +152,7 @@ export const AnalyticsDashboard = () => {
     return (
         <div style={{ padding: '0 24px 140px', maxWidth: '1400px', margin: '0 auto' }}>
             {/* Header */}
-            <div style={{ marginBottom: '48px' }}>
+            <div style={{ marginBottom: '36px' }}>
                 <p style={{
                     fontSize: '12px',
                     fontWeight: 600,
@@ -178,18 +178,18 @@ export const AnalyticsDashboard = () => {
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                gap: '14px',
-                marginBottom: '28px'
+                gap: '12px',
+                marginBottom: '20px'
             }}>
                 {kpis.map(kpi => {
                     const Icon = kpi.icon;
                     return (
                         <div key={kpi.label} style={{
                             ...cardStyle,
-                            padding: '24px',
+                            padding: '20px',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '16px',
+                            gap: '12px',
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <div style={{
@@ -224,13 +224,13 @@ export const AnalyticsDashboard = () => {
             {/* Charts */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-                gap: '20px',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+                gap: '14px',
             }}>
                 {/* Status */}
                 <div style={cardStyle}>
                     <h3 style={chartTitle}>By Status</h3>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
                             <Pie
                                 data={statusData} cx="50%" cy="50%"
@@ -253,7 +253,7 @@ export const AnalyticsDashboard = () => {
                 {/* Category */}
                 <div style={cardStyle}>
                     <h3 style={chartTitle}>By Category</h3>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={categoryData} layout="vertical" margin={{ left: 0 }}>
                             <XAxis type="number" hide />
                             <YAxis type="category" dataKey="shortName" width={140} tick={axisTick} axisLine={false} tickLine={false} />
@@ -271,7 +271,7 @@ export const AnalyticsDashboard = () => {
                 {timelineData.length > 0 && (
                     <div style={cardStyle}>
                         <h3 style={chartTitle}>Over Time</h3>
-                        <ResponsiveContainer width="100%" height={240}>
+                        <ResponsiveContainer width="100%" height={200}>
                             <AreaChart data={timelineData}>
                                 <defs>
                                     <linearGradient id="timeGrad" x1="0" y1="0" x2="0" y2="1">
@@ -295,7 +295,7 @@ export const AnalyticsDashboard = () => {
                 {/* AI Fit */}
                 <div style={cardStyle}>
                     <h3 style={chartTitle}>AI & Automation Fit</h3>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
                             <Pie
                                 data={aiData} cx="50%" cy="50%"
@@ -318,7 +318,7 @@ export const AnalyticsDashboard = () => {
                 {/* Impact */}
                 <div style={cardStyle}>
                     <h3 style={chartTitle}>Impact Type</h3>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={impactData}>
                             <XAxis dataKey="name" tick={axisTick} axisLine={false} tickLine={false} />
                             <YAxis tick={axisTick} axisLine={false} tickLine={false} allowDecimals={false} />
@@ -335,7 +335,7 @@ export const AnalyticsDashboard = () => {
                 {/* Department */}
                 <div style={cardStyle}>
                     <h3 style={chartTitle}>Department Activity</h3>
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={deptData} layout="vertical" margin={{ left: 0 }}>
                             <XAxis type="number" hide />
                             <YAxis type="category" dataKey="shortName" width={110} tick={axisTick} axisLine={false} tickLine={false} />

@@ -70,24 +70,47 @@ export default function LandingPage() {
                     </p>
 
                     <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        <Link href="/submit" style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            background: 'var(--foreground)',
-                            color: 'var(--background)',
-                            padding: '14px 28px',
-                            borderRadius: '8px',
-                            fontWeight: '600',
-                            fontSize: '15px',
-                            textDecoration: 'none',
-                            transition: 'all 0.2s',
-                        }}>
+                        <Link href="/submit"
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(99,102,241,0.3)';
+                                e.currentTarget.style.background = '#6366f1';
+                                e.currentTarget.style.color = '#fff';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = 'none';
+                                e.currentTarget.style.background = 'var(--foreground)';
+                                e.currentTarget.style.color = 'var(--background)';
+                            }}
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                background: 'var(--foreground)',
+                                color: 'var(--background)',
+                                padding: '14px 28px',
+                                borderRadius: '8px',
+                                fontWeight: '600',
+                                fontSize: '15px',
+                                textDecoration: 'none',
+                                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                            }}>
                             Submit Idea <ArrowRight size={16} />
                         </Link>
 
                         <button
                             onClick={scrollToInsights}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.borderColor = 'rgba(129,140,248,0.5)';
+                                e.currentTarget.style.color = '#a5b4fc';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.borderColor = 'var(--border)';
+                                e.currentTarget.style.color = 'var(--foreground)';
+                            }}
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
@@ -100,7 +123,7 @@ export default function LandingPage() {
                                 fontSize: '15px',
                                 border: '1px solid var(--border)',
                                 cursor: 'pointer',
-                                transition: 'all 0.2s',
+                                transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                             }}
                         >
                             View Insights <ChevronDown size={16} />
@@ -110,7 +133,7 @@ export default function LandingPage() {
             </div>
 
             {/* Analytics Dashboard */}
-            <div id="insights" style={{ paddingTop: '80px' }}>
+            <div id="insights" style={{ paddingTop: '80px', position: 'relative', zIndex: 1 }}>
                 <AnalyticsDashboard />
             </div>
         </div>
