@@ -10,50 +10,51 @@ import {
 } from 'recharts';
 import { TrendingUp, Lightbulb, CheckCircle, Zap } from 'lucide-react';
 
-const COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#7c3aed', '#4f46e5', '#6d28d9', '#5b21b6', '#4338ca', '#3730a3'];
+// Refined, harmonious palette
+const CHART_PALETTE = [
+    '#818cf8', '#6366f1', '#a78bfa', '#c084fc',
+    '#67e8f9', '#34d399', '#fbbf24', '#f472b6',
+    '#fb923c', '#38bdf8', '#4ade80',
+];
+
 const STATUS_COLORS: Record<string, string> = {
-    'Submitted': '#6366f1',
-    'In Progress': '#f59e0b',
-    'Approved': '#3b82f6',
-    'Done': '#10b981',
-    'Rejected': '#ef4444',
+    'Submitted': '#818cf8',
+    'In Progress': '#fbbf24',
+    'Approved': '#38bdf8',
+    'Done': '#34d399',
+    'Rejected': '#f87171',
 };
 
-// Shared card style
 const cardStyle: React.CSSProperties = {
-    background: 'var(--card)',
-    border: '1px solid var(--border)',
-    borderRadius: '16px',
-    padding: '24px',
-    backdropFilter: 'blur(12px)',
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    borderRadius: '20px',
+    padding: '28px',
 };
 
-// Shared tooltip style
-const tooltipStyle: React.CSSProperties = {
-    background: 'var(--card)',
-    border: '1px solid var(--border)',
-    borderRadius: '8px',
-    padding: '8px 12px',
-    fontSize: '13px',
-    color: 'var(--foreground)',
-};
-
-// Custom tooltip
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
     return (
-        <div style={tooltipStyle}>
-            <p style={{ fontWeight: 600, marginBottom: '4px' }}>{label}</p>
+        <div style={{
+            background: 'rgba(15,15,20,0.95)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px',
+            padding: '10px 16px',
+            fontSize: '13px',
+            color: '#e2e8f0',
+            backdropFilter: 'blur(8px)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+        }}>
+            {label && <p style={{ fontWeight: 600, marginBottom: '4px', color: '#fff' }}>{label}</p>}
             {payload.map((p: any, i: number) => (
-                <p key={i} style={{ color: p.color }}>{p.name}: {p.value}</p>
+                <p key={i} style={{ color: p.color || '#a5b4fc' }}>{p.name}: <strong>{p.value}</strong></p>
             ))}
         </div>
     );
 };
 
-// Render custom pie label
 const renderPieLabel = ({ name, percent }: any) => {
-    if (percent < 0.05) return null;
+    if (percent < 0.06) return null;
     return `${name} ${(percent * 100).toFixed(0)}%`;
 };
 
@@ -65,8 +66,7 @@ export const AnalyticsDashboard = () => {
         const fetchIdeas = async () => {
             try {
                 const snap = await getDocs(collection(db, 'ideas'));
-                const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Idea));
-                setIdeas(data);
+                setIdeas(snap.docs.map(d => ({ id: d.id, ...d.data() } as Idea)));
             } catch (e) {
                 console.error('Failed to load analytics:', e);
             } finally {
@@ -78,278 +78,271 @@ export const AnalyticsDashboard = () => {
 
     if (loading) {
         return (
-            <div style={{ padding: '80px 24px', textAlign: 'center', color: 'var(--muted)' }}>
-                Loading analytics...
+            <div style={{ padding: '120px 24px', textAlign: 'center', color: 'var(--muted)', fontSize: '14px' }}>
+                Loading insights...
             </div>
         );
     }
 
     if (ideas.length === 0) {
         return (
-            <div style={{ padding: '80px 24px', textAlign: 'center', color: 'var(--muted)' }}>
-                No data yet. Submit your first idea to see analytics.
+            <div style={{ padding: '120px 24px', textAlign: 'center', color: 'var(--muted)', fontSize: '14px' }}>
+                No data yet — submit your first idea to unlock insights.
             </div>
         );
     }
 
-    // --- Compute Metrics ---
-    const totalIdeas = ideas.length;
-    const completedIdeas = ideas.filter(i => i.status === 'Done' || i.status === 'Approved').length;
-    const avgScore = ideas.reduce((sum, i) => sum + (i.score || 0), 0) / totalIdeas;
+    // --- Metrics ---
+    const total = ideas.length;
+    const completed = ideas.filter(i => i.status === 'Done' || i.status === 'Approved').length;
+    const avgScore = (ideas.reduce((s, i) => s + (i.score || 0), 0) / total).toFixed(1);
+    const inProgress = ideas.filter(i => i.status === 'In Progress').length;
 
-    // Top category
-    const catCounts: Record<string, number> = {};
-    ideas.forEach(i => { catCounts[i.categoryId] = (catCounts[i.categoryId] || 0) + 1; });
-    const topCategory = Object.entries(catCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    // Group helpers
+    const groupBy = (key: keyof Idea, fallback = 'Other') =>
+        Object.entries(ideas.reduce((a, i) => {
+            const k = (i[key] as string) || fallback;
+            a[k] = (a[k] || 0) + 1;
+            return a;
+        }, {} as Record<string, number>))
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
 
-    // Status distribution
-    const statusData = Object.entries(
-        ideas.reduce((acc, i) => { acc[i.status] = (acc[i.status] || 0) + 1; return acc; }, {} as Record<string, number>)
-    ).map(([name, value]) => ({ name, value }));
+    const statusData = groupBy('status', 'Unknown');
+    const categoryData = groupBy('categoryId', 'Uncategorized').map(d => ({
+        ...d, shortName: d.name.length > 22 ? d.name.slice(0, 19) + '...' : d.name
+    }));
+    const aiData = groupBy('aiAutomationFit', 'Unsure');
+    const impactData = groupBy('impactType', 'Other');
+    const deptData = groupBy('department', 'Unknown').map(d => ({
+        ...d, shortName: d.name.length > 18 ? d.name.slice(0, 15) + '...' : d.name
+    }));
 
-    // Category distribution
-    const categoryData = Object.entries(catCounts)
-        .map(([name, value]) => ({ name: name.length > 25 ? name.slice(0, 22) + '...' : name, value, fullName: name }))
-        .sort((a, b) => b.value - a.value);
-
-    // Submissions over time (by month)
-    const monthlyData: Record<string, number> = {};
+    // Timeline
+    const monthlyBuckets: Record<string, number> = {};
     ideas.forEach(i => {
         if (i.createdAt?.toDate) {
             const d = i.createdAt.toDate();
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            monthlyData[key] = (monthlyData[key] || 0) + 1;
+            const key = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+            monthlyBuckets[key] = (monthlyBuckets[key] || 0) + 1;
         }
     });
-    const timelineData = Object.entries(monthlyData)
-        .sort((a, b) => a[0].localeCompare(b[0]))
+    const timelineData = Object.entries(monthlyBuckets)
+        .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
         .map(([month, count]) => ({ month, count }));
 
-    // AI Automation Fit
-    const aiData = Object.entries(
-        ideas.reduce((acc, i) => { const k = i.aiAutomationFit || 'Unsure'; acc[k] = (acc[k] || 0) + 1; return acc; }, {} as Record<string, number>)
-    ).map(([name, value]) => ({ name, value }));
-
-    // Impact Type
-    const impactData = Object.entries(
-        ideas.reduce((acc, i) => { const k = i.impactType || 'Other'; acc[k] = (acc[k] || 0) + 1; return acc; }, {} as Record<string, number>)
-    ).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-
-    // Department
-    const deptData = Object.entries(
-        ideas.reduce((acc, i) => { const k = i.department || 'Unknown'; acc[k] = (acc[k] || 0) + 1; return acc; }, {} as Record<string, number>)
-    ).map(([name, value]) => ({ name: name.length > 20 ? name.slice(0, 17) + '...' : name, value, fullName: name }))
-        .sort((a, b) => b.value - a.value);
-
-    // --- KPI Cards ---
     const kpis = [
-        { label: 'Total Ideas', value: totalIdeas, icon: Lightbulb, color: '#6366f1' },
-        { label: 'Approved / Done', value: completedIdeas, icon: CheckCircle, color: '#10b981' },
-        { label: 'Avg Score', value: avgScore.toFixed(1), icon: TrendingUp, color: '#f59e0b' },
-        { label: 'Top Category', value: topCategory.length > 20 ? topCategory.slice(0, 17) + '...' : topCategory, icon: Zap, color: '#8b5cf6', small: true },
+        { label: 'Total Ideas', value: total, icon: Lightbulb, accent: '#818cf8' },
+        { label: 'Approved / Done', value: completed, icon: CheckCircle, accent: '#34d399' },
+        { label: 'In Progress', value: inProgress, icon: TrendingUp, accent: '#fbbf24' },
+        { label: 'Avg Score', value: avgScore, icon: Zap, accent: '#c084fc' },
     ];
 
+    const chartTitle: React.CSSProperties = {
+        fontSize: '14px',
+        fontWeight: 600,
+        color: 'rgba(255,255,255,0.5)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        marginBottom: '24px',
+    };
+
+    const axisTick = { fill: 'rgba(255,255,255,0.35)', fontSize: 11 };
+
     return (
-        <div style={{ padding: '0 24px 120px', maxWidth: '1400px', margin: '0 auto' }}>
-            {/* Section Header */}
+        <div style={{ padding: '0 24px 140px', maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Header */}
             <div style={{ marginBottom: '48px' }}>
+                <p style={{
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--accent)',
+                    marginBottom: '12px',
+                }}>
+                    Platform Analytics
+                </p>
                 <h2 style={{
-                    fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
+                    fontSize: 'clamp(1.5rem, 3vw, 2.25rem)',
                     fontWeight: 800,
                     letterSpacing: '-0.03em',
                     color: 'var(--foreground)',
-                    marginBottom: '12px'
+                    lineHeight: 1.1,
                 }}>
-                    INSIGHTS
+                    Real-time insights
                 </h2>
-                <p style={{ color: 'var(--muted)', fontSize: '16px' }}>
-                    Real-time analytics from submitted ideas
-                </p>
             </div>
 
-            {/* KPI Cards */}
+            {/* KPI Row */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '16px',
-                marginBottom: '32px'
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '14px',
+                marginBottom: '28px'
             }}>
-                {kpis.map((kpi) => {
+                {kpis.map(kpi => {
                     const Icon = kpi.icon;
                     return (
                         <div key={kpi.label} style={{
                             ...cardStyle,
+                            padding: '24px',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '12px'
+                            gap: '16px',
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <div style={{
-                                    width: '36px', height: '36px', borderRadius: '10px',
-                                    background: `${kpi.color}20`,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                    width: '32px', height: '32px', borderRadius: '10px',
+                                    background: `${kpi.accent}15`,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 }}>
-                                    <Icon size={18} color={kpi.color} />
+                                    <Icon size={16} color={kpi.accent} />
                                 </div>
-                                <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 500 }}>
+                                <span style={{
+                                    fontSize: '12px', fontWeight: 600,
+                                    color: 'rgba(255,255,255,0.4)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.06em',
+                                }}>
                                     {kpi.label}
                                 </span>
                             </div>
-                            <div style={{
-                                fontSize: kpi.small ? '18px' : '32px',
-                                fontWeight: 800,
+                            <span style={{
+                                fontSize: '36px', fontWeight: 800,
                                 color: 'var(--foreground)',
-                                letterSpacing: '-0.02em'
+                                letterSpacing: '-0.03em',
+                                lineHeight: 1,
                             }}>
                                 {kpi.value}
-                            </div>
+                            </span>
                         </div>
                     );
                 })}
             </div>
 
-            {/* Charts Grid */}
+            {/* Charts */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
-                gap: '24px',
+                gap: '20px',
             }}>
-                {/* Status Distribution */}
+                {/* Status */}
                 <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '20px' }}>
-                        Ideas by Status
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
+                    <h3 style={chartTitle}>By Status</h3>
+                    <ResponsiveContainer width="100%" height={240}>
                         <PieChart>
                             <Pie
-                                data={statusData}
-                                cx="50%" cy="50%"
-                                innerRadius={60} outerRadius={90}
-                                paddingAngle={3}
-                                dataKey="value"
-                                label={renderPieLabel}
-                                labelLine={false}
+                                data={statusData} cx="50%" cy="50%"
+                                innerRadius={65} outerRadius={95}
+                                paddingAngle={4} dataKey="value"
+                                label={renderPieLabel} labelLine={false}
+                                stroke="none"
                             >
-                                {statusData.map((entry) => (
-                                    <Cell key={entry.name} fill={STATUS_COLORS[entry.name] || '#6366f1'} />
+                                {statusData.map(e => (
+                                    <Cell key={e.name} fill={STATUS_COLORS[e.name] || '#818cf8'} />
                                 ))}
                             </Pie>
                             <Tooltip content={<CustomTooltip />} />
-                            <Legend
-                                iconType="circle"
-                                wrapperStyle={{ fontSize: '12px', color: 'var(--muted)' }}
-                            />
+                            <Legend iconType="circle" iconSize={8}
+                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Category Distribution */}
+                {/* Category */}
                 <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '20px' }}>
-                        Ideas by Category
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={categoryData} layout="vertical" margin={{ left: 10 }}>
+                    <h3 style={chartTitle}>By Category</h3>
+                    <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={categoryData} layout="vertical" margin={{ left: 0 }}>
                             <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" width={140} tick={{ fill: 'var(--muted)', fontSize: 11 }} />
+                            <YAxis type="category" dataKey="shortName" width={140} tick={axisTick} axisLine={false} tickLine={false} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="value" name="Ideas" radius={[0, 6, 6, 0]}>
+                            <Bar dataKey="value" name="Ideas" radius={[0, 8, 8, 0]} barSize={16}>
                                 {categoryData.map((_, i) => (
-                                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                 ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Submissions Timeline */}
+                {/* Timeline */}
                 {timelineData.length > 0 && (
                     <div style={cardStyle}>
-                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '20px' }}>
-                            Submissions Over Time
-                        </h3>
-                        <ResponsiveContainer width="100%" height={250}>
+                        <h3 style={chartTitle}>Over Time</h3>
+                        <ResponsiveContainer width="100%" height={240}>
                             <AreaChart data={timelineData}>
                                 <defs>
-                                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
-                                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                                    <linearGradient id="timeGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="#818cf8" stopOpacity={0.25} />
+                                        <stop offset="100%" stopColor="#818cf8" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <XAxis dataKey="month" tick={{ fill: 'var(--muted)', fontSize: 11 }} />
-                                <YAxis tick={{ fill: 'var(--muted)', fontSize: 11 }} allowDecimals={false} />
+                                <XAxis dataKey="month" tick={axisTick} axisLine={false} tickLine={false} />
+                                <YAxis tick={axisTick} axisLine={false} tickLine={false} allowDecimals={false} />
                                 <Tooltip content={<CustomTooltip />} />
                                 <Area
                                     type="monotone" dataKey="count" name="Submissions"
-                                    stroke="#6366f1" strokeWidth={2}
-                                    fill="url(#areaGrad)"
+                                    stroke="#818cf8" strokeWidth={2}
+                                    fill="url(#timeGrad)" dot={{ r: 3, fill: '#818cf8', strokeWidth: 0 }}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 )}
 
-                {/* AI Adoption Fit */}
+                {/* AI Fit */}
                 <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '20px' }}>
-                        AI & Automation Fit
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
+                    <h3 style={chartTitle}>AI & Automation Fit</h3>
+                    <ResponsiveContainer width="100%" height={240}>
                         <PieChart>
                             <Pie
-                                data={aiData}
-                                cx="50%" cy="50%"
-                                innerRadius={60} outerRadius={90}
-                                paddingAngle={3}
-                                dataKey="value"
-                                label={renderPieLabel}
-                                labelLine={false}
+                                data={aiData} cx="50%" cy="50%"
+                                innerRadius={65} outerRadius={95}
+                                paddingAngle={4} dataKey="value"
+                                label={renderPieLabel} labelLine={false}
+                                stroke="none"
                             >
                                 {aiData.map((_, i) => (
-                                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                 ))}
                             </Pie>
                             <Tooltip content={<CustomTooltip />} />
-                            <Legend
-                                iconType="circle"
-                                wrapperStyle={{ fontSize: '12px', color: 'var(--muted)' }}
-                            />
+                            <Legend iconType="circle" iconSize={8}
+                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Impact Type */}
+                {/* Impact */}
                 <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '20px' }}>
-                        Impact Type
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
+                    <h3 style={chartTitle}>Impact Type</h3>
+                    <ResponsiveContainer width="100%" height={240}>
                         <BarChart data={impactData}>
-                            <XAxis dataKey="name" tick={{ fill: 'var(--muted)', fontSize: 11 }} />
-                            <YAxis tick={{ fill: 'var(--muted)', fontSize: 11 }} allowDecimals={false} />
+                            <XAxis dataKey="name" tick={axisTick} axisLine={false} tickLine={false} />
+                            <YAxis tick={axisTick} axisLine={false} tickLine={false} allowDecimals={false} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="value" name="Ideas" radius={[6, 6, 0, 0]}>
+                            <Bar dataKey="value" name="Ideas" radius={[8, 8, 0, 0]} barSize={32}>
                                 {impactData.map((_, i) => (
-                                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                 ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* Department Activity */}
+                {/* Department */}
                 <div style={cardStyle}>
-                    <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--foreground)', marginBottom: '20px' }}>
-                        Department Activity
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
-                        <BarChart data={deptData} layout="vertical" margin={{ left: 10 }}>
+                    <h3 style={chartTitle}>Department Activity</h3>
+                    <ResponsiveContainer width="100%" height={240}>
+                        <BarChart data={deptData} layout="vertical" margin={{ left: 0 }}>
                             <XAxis type="number" hide />
-                            <YAxis type="category" dataKey="name" width={120} tick={{ fill: 'var(--muted)', fontSize: 11 }} />
+                            <YAxis type="category" dataKey="shortName" width={110} tick={axisTick} axisLine={false} tickLine={false} />
                             <Tooltip content={<CustomTooltip />} />
-                            <Bar dataKey="value" name="Ideas" radius={[0, 6, 6, 0]}>
+                            <Bar dataKey="value" name="Ideas" radius={[0, 8, 8, 0]} barSize={14}>
                                 {deptData.map((_, i) => (
-                                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                 ))}
                             </Bar>
                         </BarChart>
