@@ -1,9 +1,9 @@
 'use client';
 
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
+import { getAuth, Auth } from "firebase/auth";
+import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,9 +14,32 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase (Singleton pattern to avoid re-initialization)
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Lazy init — only runs client-side, prevents crashes during static export
+function getFirebaseApp(): FirebaseApp {
+  return !getApps().length ? initializeApp(firebaseConfig) : getApp();
+}
 
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+let _auth: Auth;
+let _db: Firestore;
+let _storage: FirebaseStorage;
+
+export const auth: Auth = new Proxy({} as Auth, {
+  get(_, prop) {
+    if (!_auth) _auth = getAuth(getFirebaseApp());
+    return (_auth as any)[prop];
+  },
+});
+
+export const db: Firestore = new Proxy({} as Firestore, {
+  get(_, prop) {
+    if (!_db) _db = getFirestore(getFirebaseApp());
+    return (_db as any)[prop];
+  },
+});
+
+export const storage: FirebaseStorage = new Proxy({} as FirebaseStorage, {
+  get(_, prop) {
+    if (!_storage) _storage = getStorage(getFirebaseApp());
+    return (_storage as any)[prop];
+  },
+});
