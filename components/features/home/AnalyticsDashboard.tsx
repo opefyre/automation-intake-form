@@ -26,7 +26,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const cardStyle: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.03)',
+    background: 'rgba(10,10,18,0.85)',
     border: '1px solid rgba(255,255,255,0.06)',
     borderRadius: '16px',
     padding: '20px',
