@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth';
+import { User, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 
 interface AuthContextType {
@@ -36,36 +36,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return () => unsubscribe();
     }, []);
 
-    // Handle redirect result on mount
-    useEffect(() => {
-        getRedirectResult(auth)
-            .then(async (result) => {
-                if (result?.user) {
-                    const allowedDomains = ['snoonu.com', 'gmail.com'];
-                    const emailDomain = result.user.email?.split('@')[1];
-
-                    if (!emailDomain || !allowedDomains.includes(emailDomain)) {
-                        await signOut(auth);
-                        setError('Access restricted to company emails only.');
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error("Redirect sign-in error:", error);
-                setError(error.message);
-            });
-    }, []);
-
     const signInWithGoogle = async () => {
         setLoading(true);
         setError(null);
         const provider = new GoogleAuthProvider();
 
         try {
-            await signInWithRedirect(auth, provider);
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+
+            // Domain Restriction
+            const allowedDomains = ['snoonu.com', 'gmail.com'];
+            const emailDomain = user.email?.split('@')[1];
+
+            if (!emailDomain || !allowedDomains.includes(emailDomain)) {
+                await signOut(auth);
+                setError('Access restricted to company emails only.');
+                return;
+            }
         } catch (error: any) {
             console.error("Error signing in with Google", error);
             setError(error.message);
+        } finally {
             setLoading(false);
         }
     };
