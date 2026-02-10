@@ -113,7 +113,7 @@ export const NeuralBackground = () => {
                     if (dist < connectionDistance) {
                         ctx.beginPath();
                         // 0.15 opacity is subtle.
-                        ctx.strokeStyle = `rgba(${color}, ${0.2 * (1 - dist / connectionDistance)})`;
+                        ctx.strokeStyle = `rgba(${color}, ${0.08 * (1 - dist / connectionDistance)})`;
                         ctx.lineWidth = 1;
                         ctx.moveTo(p.x, p.y);
                         ctx.lineTo(p2.x, p2.y);
@@ -124,7 +124,7 @@ export const NeuralBackground = () => {
                 // Draw Particle
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${color}, ${isDark ? 0.8 : 0.6})`; // Slightly higher opacity since no shadow
+                ctx.fillStyle = `rgba(${color}, ${isDark ? 0.3 : 0.25})`;
                 ctx.fill();
 
                 // Optional: Fake glow for dark mode using a second larger low-opacity circle?

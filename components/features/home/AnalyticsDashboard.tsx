@@ -53,10 +53,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
 };
 
-const renderPieLabel = ({ name, percent }: any) => {
-    if (percent < 0.06) return null;
-    return `${name} ${(percent * 100).toFixed(0)}%`;
-};
+
 
 export const AnalyticsDashboard = () => {
     const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -151,6 +148,8 @@ export const AnalyticsDashboard = () => {
 
     return (
         <div style={{ padding: '0 24px 140px', maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Suppress recharts default white hover cursor */}
+            <style>{`.recharts-tooltip-cursor { display: none !important; }`}</style>
             {/* Header */}
             <div style={{ marginBottom: '36px' }}>
                 <p style={{
@@ -234,18 +233,17 @@ export const AnalyticsDashboard = () => {
                         <PieChart>
                             <Pie
                                 data={statusData} cx="50%" cy="50%"
-                                innerRadius={65} outerRadius={95}
+                                innerRadius={55} outerRadius={80}
                                 paddingAngle={4} dataKey="value"
-                                label={renderPieLabel} labelLine={false}
                                 stroke="none"
                             >
                                 {statusData.map(e => (
                                     <Cell key={e.name} fill={STATUS_COLORS[e.name] || '#818cf8'} />
                                 ))}
                             </Pie>
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Legend iconType="circle" iconSize={8}
-                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} />
+                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', paddingTop: '4px' }} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -257,7 +255,7 @@ export const AnalyticsDashboard = () => {
                         <BarChart data={categoryData} layout="vertical" margin={{ left: 0 }}>
                             <XAxis type="number" hide />
                             <YAxis type="category" dataKey="shortName" width={140} tick={axisTick} axisLine={false} tickLine={false} />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Bar dataKey="value" name="Ideas" radius={[0, 8, 8, 0]} barSize={16}>
                                 {categoryData.map((_, i) => (
                                     <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
@@ -281,7 +279,7 @@ export const AnalyticsDashboard = () => {
                                 </defs>
                                 <XAxis dataKey="month" tick={axisTick} axisLine={false} tickLine={false} />
                                 <YAxis tick={axisTick} axisLine={false} tickLine={false} allowDecimals={false} />
-                                <Tooltip content={<CustomTooltip />} />
+                                <Tooltip content={<CustomTooltip />} cursor={false} />
                                 <Area
                                     type="monotone" dataKey="count" name="Submissions"
                                     stroke="#818cf8" strokeWidth={2}
@@ -299,18 +297,17 @@ export const AnalyticsDashboard = () => {
                         <PieChart>
                             <Pie
                                 data={aiData} cx="50%" cy="50%"
-                                innerRadius={65} outerRadius={95}
+                                innerRadius={55} outerRadius={80}
                                 paddingAngle={4} dataKey="value"
-                                label={renderPieLabel} labelLine={false}
                                 stroke="none"
                             >
                                 {aiData.map((_, i) => (
                                     <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                 ))}
                             </Pie>
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Legend iconType="circle" iconSize={8}
-                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }} />
+                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', paddingTop: '4px' }} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -322,7 +319,7 @@ export const AnalyticsDashboard = () => {
                         <BarChart data={impactData}>
                             <XAxis dataKey="name" tick={axisTick} axisLine={false} tickLine={false} />
                             <YAxis tick={axisTick} axisLine={false} tickLine={false} allowDecimals={false} />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Bar dataKey="value" name="Ideas" radius={[8, 8, 0, 0]} barSize={32}>
                                 {impactData.map((_, i) => (
                                     <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
@@ -339,7 +336,7 @@ export const AnalyticsDashboard = () => {
                         <BarChart data={deptData} layout="vertical" margin={{ left: 0 }}>
                             <XAxis type="number" hide />
                             <YAxis type="category" dataKey="shortName" width={110} tick={axisTick} axisLine={false} tickLine={false} />
-                            <Tooltip content={<CustomTooltip />} />
+                            <Tooltip content={<CustomTooltip />} cursor={false} />
                             <Bar dataKey="value" name="Ideas" radius={[0, 8, 8, 0]} barSize={14}>
                                 {deptData.map((_, i) => (
                                     <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
