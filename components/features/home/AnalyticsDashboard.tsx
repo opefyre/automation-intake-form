@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 import { Idea } from '@/lib/types';
@@ -25,13 +26,6 @@ const STATUS_COLORS: Record<string, string> = {
     'Rejected': '#f87171',
 };
 
-const cardStyle: React.CSSProperties = {
-    background: 'rgba(10,10,18,0.85)',
-    border: '1px solid rgba(255,255,255,0.06)',
-    borderRadius: '16px',
-    padding: '20px',
-};
-
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
     return (
@@ -53,11 +47,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     );
 };
 
-
-
 export const AnalyticsDashboard = () => {
     const [ideas, setIdeas] = useState<Idea[]>([]);
     const [loading, setLoading] = useState(true);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
 
     useEffect(() => {
         const fetchIdeas = async () => {
@@ -88,6 +82,33 @@ export const AnalyticsDashboard = () => {
             </div>
         );
     }
+
+    // --- Theme-aware tokens ---
+    const cardBg = isDark ? 'rgba(10,10,18,0.85)' : 'rgba(255,255,255,0.85)';
+    const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)';
+    const labelColor = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.45)';
+    const titleColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
+    const legendColor = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.55)';
+    const tickColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.4)';
+
+    const cardStyle: React.CSSProperties = {
+        background: cardBg,
+        border: `1px solid ${cardBorder}`,
+        borderRadius: '16px',
+        padding: '20px',
+        backdropFilter: 'blur(12px)',
+    };
+
+    const chartTitle: React.CSSProperties = {
+        fontSize: '13px',
+        fontWeight: 600,
+        color: titleColor,
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        marginBottom: '12px',
+    };
+
+    const axisTick = { fill: tickColor, fontSize: 11 };
 
     // --- Metrics ---
     const total = ideas.length;
@@ -135,16 +156,7 @@ export const AnalyticsDashboard = () => {
         { label: 'Avg Score', value: avgScore, icon: Zap, accent: '#c084fc' },
     ];
 
-    const chartTitle: React.CSSProperties = {
-        fontSize: '13px',
-        fontWeight: 600,
-        color: 'rgba(255,255,255,0.5)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.08em',
-        marginBottom: '12px',
-    };
-
-    const axisTick = { fill: 'rgba(255,255,255,0.35)', fontSize: 11 };
+    const legendStyle = { fontSize: '11px', color: legendColor, paddingTop: '4px' };
 
     return (
         <div style={{ padding: '0 24px 140px', maxWidth: '1400px', margin: '0 auto' }}>
@@ -200,7 +212,7 @@ export const AnalyticsDashboard = () => {
                                 </div>
                                 <span style={{
                                     fontSize: '12px', fontWeight: 600,
-                                    color: 'rgba(255,255,255,0.4)',
+                                    color: labelColor,
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.06em',
                                 }}>
@@ -242,8 +254,7 @@ export const AnalyticsDashboard = () => {
                                 ))}
                             </Pie>
                             <Tooltip content={<CustomTooltip />} cursor={false} />
-                            <Legend iconType="circle" iconSize={8}
-                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', paddingTop: '4px' }} />
+                            <Legend iconType="circle" iconSize={8} wrapperStyle={legendStyle} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -306,8 +317,7 @@ export const AnalyticsDashboard = () => {
                                 ))}
                             </Pie>
                             <Tooltip content={<CustomTooltip />} cursor={false} />
-                            <Legend iconType="circle" iconSize={8}
-                                wrapperStyle={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)', paddingTop: '4px' }} />
+                            <Legend iconType="circle" iconSize={8} wrapperStyle={legendStyle} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
