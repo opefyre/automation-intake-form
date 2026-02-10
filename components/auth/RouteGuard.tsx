@@ -44,16 +44,6 @@ export const RouteGuard = ({ children }: { children: React.ReactNode }) => {
         );
     }
 
-    // If on login page, just render children (Login Page)
-    if (!user && pathname === '/login') {
-        return <>{children}</>;
-    }
-
-    // If logged in, render children
-    if (user) {
-        return <>{children}</>;
-    }
-
-    // Return null while redirecting
-    return null;
+    // Always render children — redirects are handled by useEffect above
+    return <>{children}</>;
 };

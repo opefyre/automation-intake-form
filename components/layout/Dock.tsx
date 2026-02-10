@@ -40,9 +40,12 @@ export const Dock = () => {
     const { user, signInWithGoogle, logout } = useAuth();
     const pathname = usePathname();
     const [hovered, setHovered] = useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
 
-    // Hide dock if not logged in
-    if (!user) return null;
+    useEffect(() => setMounted(true), []);
+
+    // Hide dock when not logged in or not yet mounted (SSR/hydration safe)
+    if (!mounted || !user) return null;
 
     const items = [
         { id: 'home', label: 'Home', icon: Home, href: '/' },
