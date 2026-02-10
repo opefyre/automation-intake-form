@@ -37,7 +37,11 @@ yarn-error.log*
 # Firebase Service Account
 automation-intake-form-4a1294840001.json
 *.json
+!package.json
 !package-lock.json
+!firebase.json
+!firestore.indexes.json
+!tsconfig.json
 
 # vercel
 .vercel
