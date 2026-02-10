@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        /* LIGHT MODE */
+        --background: #FFFFFF;
+        --foreground: #050505;
+        --card: #F5F5F5;
+        --card-hover: #E5E5E5;
+        --border: #E5E5E5;
+        --muted: #666666;
+        --accent: #2563EB;
+        /* Bright Blue */
+        --accent-glow: rgba(37, 99, 235, 0.2);
+
+        --font-sans: var(--font-geist-sans);
+        --font-mono: 'Geist Mono', monospace;
+    }
+
+    .dark {
+        /* DARK MODE (VOID) */
+        --background: #050505;
+        --foreground: #EDEDED;
+        --card: #0A0A0A;
+        --card-hover: #111111;
+        --border: #1F1F1F;
+        --muted: #888888;
+        --accent: #3B82F6;
+        /* Electric Indigo */
+        --accent-glow: rgba(59, 130, 246, 0.1);
+    }
+}
+
+/* 
+  THE VOID SYSTEM 
+  Hardcoded values for absolute safety. 
+  No complex variable chains.
+*/
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--background);
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--background);
+    color: var(--foreground);
+    line-height: 1.5;
+    font-size: 16px;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Atomic Utilities (if Tailwind fails) */
+.text-primary {
+    color: #EDEDED;
+}
+
+.text-secondary {
+    color: #888888;
+}
+
+.text-accent {
+    color: #3B82F6;
+}
+
+.bg-void {
+    background-color: #050505;
+}
+
+.bg-surface {
+    background-color: #0A0A0A;
+}
+
+.border-dim {
+    border: 1px solid #1F1F1F;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1F1F1F;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #333;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-in {
+    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

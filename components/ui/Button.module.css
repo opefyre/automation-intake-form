@@ -1,0 +1,118 @@
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    position: relative;
+    letter-spacing: 0;
+}
+
+.button:active {
+    transform: scale(0.97);
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Primary */
+.primary {
+    background-color: var(--accent);
+    color: #0a0f1a;
+}
+
+.primary:hover {
+    background-color: var(--accent-hover);
+}
+
+/* Secondary */
+.secondary {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.secondary:hover {
+    background-color: var(--border);
+}
+
+/* Glass → now "outline" style */
+.glass {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.glass:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+}
+
+/* Danger */
+.danger {
+    background-color: transparent;
+    color: var(--danger);
+    border: 1px solid #7f1d1d;
+}
+
+.danger:hover {
+    background-color: #1c1520;
+}
+
+/* Sizes */
+.sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.md {
+    height: 38px;
+    padding: 0 16px;
+    font-size: 14px;
+}
+
+.lg {
+    height: 44px;
+    padding: 0 24px;
+    font-size: 15px;
+}
+
+.icon {
+    margin-right: 8px;
+    display: flex;
+}
+
+.content {
+    display: flex;
+    align-items: center;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    position: absolute;
+}
+
+.loading .content {
+    opacity: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

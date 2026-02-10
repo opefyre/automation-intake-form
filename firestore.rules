@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Config: Allowed domains
+    function isCompanyEmail() {
+      // In production, sync this via a blocking function or claim
+      // For strictly client-side rules:
+      return request.auth.token.email.matches('.*@snoonu[.]com') || 
+             request.auth.token.email.matches('.*@gmail[.]com'); // Remove gmail in prod
+    }
+
+    // Role checks (Mocked for now based on email, better with custom claims)
+    function isAdmin() {
+       return request.auth.token.email in ['opefyre@gmail.com', 'admin@snoonu.com'];
+    }
+
+    // Allow read/write for ALL documents for authenticated users (Development Mode)
+    // This fixes errors with 'categories', 'departments', 'ideas', and any future collections.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
