@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
-const samlProvider = new SAMLAuthProvider('saml.snoonu');
+const samlProvider = new SAMLAuthProvider('saml.innovation-hub');
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
