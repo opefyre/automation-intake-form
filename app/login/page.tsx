@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/lib/context/AuthContext';
 import { NeuralBackground } from '@/components/features/home/NeuralBackground';
-import { User, Shield } from 'lucide-react';
+import { Shield, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
     const { signInWithGoogle, error } = useAuth();
@@ -55,7 +55,7 @@ export default function LoginPage() {
                         Innovation Hub
                     </h1>
                     <p style={{ color: 'var(--muted)', fontSize: '14px' }}>
-                        Sign in to access the internal engine.
+                        Sign in with your company account.
                     </p>
                 </div>
 
@@ -86,8 +86,8 @@ export default function LoginPage() {
                         e.currentTarget.style.background = 'var(--card-hover)';
                     }}
                 >
-                    <User size={20} />
-                    Sign in with Google
+                    <LogIn size={20} />
+                    Sign in with SSO
                 </button>
 
                 {error && (
