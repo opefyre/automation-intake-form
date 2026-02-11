@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { User, onAuthStateChanged, SAMLAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
 
 interface AuthContextType {
@@ -22,6 +22,8 @@ const AuthContext = createContext<AuthContextType>({
 
 export const useAuth = () => useContext(AuthContext);
 
+const samlProvider = new SAMLAuthProvider('saml.snoonu');
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
@@ -39,23 +41,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const signInWithGoogle = async () => {
         setLoading(true);
         setError(null);
-        const provider = new GoogleAuthProvider();
 
         try {
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            // Domain Restriction
-            const allowedDomains = ['snoonu.com', 'gmail.com'];
-            const emailDomain = user.email?.split('@')[1];
-
-            if (!emailDomain || !allowedDomains.includes(emailDomain)) {
-                await signOut(auth);
-                setError('Access restricted to company emails only.');
-                return;
-            }
+            await signInWithPopup(auth, samlProvider);
         } catch (error: any) {
-            console.error("Error signing in with Google", error);
+            console.error("Error signing in with SAML", error);
             setError(error.message);
         } finally {
             setLoading(false);
